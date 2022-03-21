@@ -47,6 +47,32 @@ namespace FirstWebApi.Controllers
             return Ok();
         }
 
+        [HttpDelete, Route("delete")]
+        public IActionResult Delete([FromBody] Dates dates)
+        {
+            if (dates.DateFrom >= dates.DateTo)
+            {
+                return Problem("Вторая дата должна быть больше первой");
+            }
+            var value = _repository.Weather.FindLast(w => w.Date >= dates.DateFrom && w.Date <= dates.DateTo);
+            if (value is null)
+            {
+                return Problem("Не надйдено для удаления");
+            }
+            _repository.Weather.Remove(value);
+            return Ok();
+        }
+
+        [HttpGet, Route("get")]
+        public IEnumerable<WeatherForecast> Get([FromBody] Dates dates)
+        {
+            if (dates.DateFrom >= dates.DateTo)
+            {
+                return null;
+            }
+            return _repository.Weather.FindAll(w => w.Date >= dates.DateFrom && w.Date <= dates.DateTo).ToArray();
+        }
+
         [HttpGet, Route("getall")]
         public IEnumerable<WeatherForecast> GetAll()
         {
